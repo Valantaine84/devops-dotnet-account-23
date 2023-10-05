@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('SCM') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Valantaine84/devops-dotnet-account-23-v2.git'
+            }
+        }
+        stage('Build DotNet') {
+            steps {
+                bat(script: 'dir' , returnStdout:true);
+                bat(script: 'dotnet restore' , returnStdout:true);
+                bat(script: 'dotnet build' , returnStdout:true);
+                bat(script: 'dotnet test' , returnStdout:true);
+            }
+        }
+        stage('Build Docker') {
+            steps {
+                 bat(script: 'docker build -t valantaine/devops-ms-account-v2 .' , returnStdout:true)
+                 bat(script: 'docker push valantaine/devops-ms-account-v2' , returnStdout:true)
+            }
+        }
+        stage('CD AKS') {
+            steps {
+            bat(script: 'az login --service-principal --username 328b598d-dcb4-49b7-8b03-c4d36df4cfa8 --password aYz8Q~BIZ8Zgh188zxFj~npnChxxWGxd_iv35anA --tenant d7be71f7-33b3-42d9-9dc1-3bd3ffe507a0', returnStdout: true);
+            bat(script: 'az account set --subscription 010bacfb-fe30-41f1-9499-3f79b42a8df2', returnStdout: true);
+            bat(script: 'az aks get-credentials --resource-group Devops --name cluster-devops-01 & kubectl config get-contexts --kubeconfig=%KUBE_PATH_CONFIG%', returnStdout: true);
+            bat(script: 'az aks get-credentials --resource-group Devops --name aksdevops23  & kubectl config get-contexts --kubeconfig=%KUBE_PATH_CONFIG%', returnStdout: true);
+            bat(script: 'kubectl config use-context aksdevops23  --kubeconfig=%KUBE_PATH_CONFIG%', returnStdout: true);
+            bat(script: 'kubectl apply -f k8s.yml --kubeconfig=%KUBE_PATH_CONFIG%', returnStdout: true);
+            bat(script: 'kubectl rollout restart deployment app-deployment --kubeconfig=%KUBE_PATH_CONFIG%', returnStdout: true);    
+            }
+        }
+    }
+}
