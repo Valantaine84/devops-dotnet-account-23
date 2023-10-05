@@ -11,7 +11,7 @@ var app = builder.Build();
 app.MapGet("/", () =>
 {
     app.Logger.LogInformation("Initial Home Get");
-    return "GET - Net 6 Running ... 28092023-v1.0.0 CI/CD in TRIGGER IS ACTIVE v1.0.1 POLYGLOT";
+    return "GET - Net 6 Running ... 28092023-v1.0.0 CI/CD PIPELINE v1.0.2 POLYGLOT STUDY";
 });
 
 app.MapPost("/", () =>
